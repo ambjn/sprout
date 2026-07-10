@@ -1,0 +1,100 @@
+{
+  "name": "@sprout-convex/analytics",
+  "version": "0.1.0",
+  "description": "Product analytics + error tracking for Expo apps, running inside your own Convex deployment.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "keywords": [
+    "convex",
+    "component",
+    "analytics",
+    "expo",
+    "react-native"
+  ],
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx"
+  ],
+  "bin": {
+    "sprout": "./dist/cli/index.js"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
+    },
+    "./convex.config": {
+      "types": "./dist/component/convex.config.d.ts",
+      "default": "./dist/component/convex.config.js"
+    },
+    "./convex.config.js": {
+      "types": "./dist/component/convex.config.d.ts",
+      "default": "./dist/component/convex.config.js"
+    },
+    "./expo": {
+      "types": "./dist/expo/index.d.ts",
+      "default": "./dist/expo/index.js"
+    },
+    "./expo/hooks": {
+      "types": "./dist/expo/hooks.d.ts",
+      "default": "./dist/expo/hooks.js"
+    }
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json && chmod +x dist/cli/index.js && bun run build:dashboard",
+    "build:dashboard": "bun run --cwd ../../apps/dashboard build && rm -rf dist/dashboard && cp -R ../../apps/dashboard/dist dist/dashboard",
+    "prepublishOnly": "bun run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "convex": "^1.35.0",
+    "expo-router": "*",
+    "expo-device": "*",
+    "expo-constants": "*",
+    "react": "*",
+    "react-native": "*",
+    "@react-native-async-storage/async-storage": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo-router": {
+      "optional": true
+    },
+    "expo-device": {
+      "optional": true
+    },
+    "expo-constants": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    },
+    "@react-native-async-storage/async-storage": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@sprout-convex/dashboard": "workspace:*",
+    "@types/bun": "^1.2.0",
+    "@types/node": "^20.19.0",
+    "@types/react": "catalog:",
+    "convex": "catalog:",
+    "convex-test": "^0.0.54",
+    "expo-constants": "^18.0.0",
+    "expo-device": "^8.0.0",
+    "react": "catalog:",
+    "react-native": "^0.81.0",
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "typescript": "catalog:"
+  }
+}

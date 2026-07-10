@@ -1,0 +1,23 @@
+{
+  "name": "sprout",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "apps/*"
+    ],
+    "catalog": {
+      "convex": "^1.41.0",
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0",
+      "@types/react": "^19.0.0",
+      "@types/react-dom": "^19.0.0",
+      "typescript": "^5.9.3"
+    }
+  },
+  "scripts": {
+    "build": "bun run --cwd packages/analytics build",
+    "test": "bun test",
+    "typecheck": "bun run --filter '*' typecheck"
+  }
+}
