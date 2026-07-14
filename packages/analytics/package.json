@@ -9,7 +9,7 @@
     "url": "git+https://github.com/ambjn/sprout.git",
     "directory": "packages/analytics"
   },
-  "homepage": "https://github.com/ambjn/sprout#readme",
+  "homepage": "https://github.com/ambjn/sprout/blob/main/packages/analytics/README.md",
   "bugs": {
     "url": "https://github.com/ambjn/sprout/issues"
   },
