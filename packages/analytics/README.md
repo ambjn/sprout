@@ -56,7 +56,7 @@ From your app's root (a Convex + Expo project with `npx convex dev` already
 set up):
 
 ```sh
-npx sprout init
+bunx sprout init
 ```
 
 This mounts the component, generates a write key and dashboard key, wires the
@@ -130,7 +130,7 @@ track("game_started", { level: 3 });
 Once events are flowing, launch the dashboard from your app's root directory:
 
 ```sh
-npx sprout dashboard
+bunx sprout dashboard
 ```
 
 ## License
