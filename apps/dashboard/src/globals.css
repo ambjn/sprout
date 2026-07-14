@@ -4,14 +4,14 @@
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  --color-surface-1: #faf8e6;
-  --color-page-plane: #f3f1d0;
-  --color-text-primary: #0b0b0b;
-  --color-text-secondary: #52514e;
-  --color-text-muted: #898781;
-  --color-gridline: #e0ddc0;
-  --color-baseline: #c9c6a0;
-  --color-line: rgba(11, 11, 11, 0.1);
+  --color-surface-1: #f7f4e4;
+  --color-page-plane: #e9e5c2;
+  --color-text-primary: #201f1a;
+  --color-text-secondary: #55534a;
+  --color-text-muted: #86836f;
+  --color-gridline: #d9d4b8;
+  --color-baseline: #c2bd9c;
+  --color-line: rgba(20, 20, 16, 0.14);
   --color-series-1: #2a78d6;
   --color-series-2: #4fa87e;
   --color-series-3: #c98a3f;
