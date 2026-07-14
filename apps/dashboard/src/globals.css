@@ -4,13 +4,13 @@
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  --color-surface-1: #fcfcfb;
-  --color-page-plane: #f9f9f7;
+  --color-surface-1: #faf8e6;
+  --color-page-plane: #f3f1d0;
   --color-text-primary: #0b0b0b;
   --color-text-secondary: #52514e;
   --color-text-muted: #898781;
-  --color-gridline: #e1e0d9;
-  --color-baseline: #c3c2b7;
+  --color-gridline: #e0ddc0;
+  --color-baseline: #c9c6a0;
   --color-line: rgba(11, 11, 11, 0.1);
   --color-series-1: #2a78d6;
   --color-series-2: #4fa87e;
@@ -20,26 +20,6 @@
   --color-status-warning: #fab219;
   --color-status-serious: #ec835a;
   --color-status-critical: #d03b3b;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-surface-1: #1a1a19;
-    --color-page-plane: #0d0d0d;
-    --color-text-primary: #ffffff;
-    --color-text-secondary: #c3c2b7;
-    --color-text-muted: #898781;
-    --color-gridline: #2c2c2a;
-    --color-baseline: #383835;
-    --color-line: rgba(255, 255, 255, 0.1);
-    /* Dark steps validated (lightness band L 0.48–0.67, chroma, CVD
-       separation, 3:1 contrast vs #1a1a19) — not an automatic flip of the
-       light palette. */
-    --color-series-1: #3987e5;
-    --color-series-2: #2ea374;
-    --color-series-3: #c08236;
-    --color-series-4: #8f7ce0;
-  }
 }
 
 body {
