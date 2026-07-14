@@ -39,7 +39,7 @@ bun add @sprout-convex/analytics
 
 ## Quick start
 
-From your app's root (a Convex + Expo project with `npx convex dev` already
+From your app's root (a Convex + Expo project with `bunx convex dev` already
 set up):
 
 ```sh
@@ -78,7 +78,7 @@ export default http;
 
 ```ts
 // convex/sproutSetup.ts — one-time registration, run via
-// `npx convex run sproutSetup:register '{"writeKey":"..."}'`
+// `bunx convex run sproutSetup:register '{"writeKey":"..."}'`
 import { internalMutation } from "./_generated/server";
 import { Sprout } from "@sprout-convex/analytics/client";
 import { components } from "./_generated/api";
