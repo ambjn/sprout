@@ -26,9 +26,9 @@ export function Card({
         <div className="flex items-baseline justify-between gap-2 mb-4">
           <div>
             {title && (
-              <h2 className="text-[13px] font-semibold text-text-secondary m-0">{title}</h2>
+              <h2 className="text-sm font-semibold text-text-primary m-0">{title}</h2>
             )}
-            {subtitle && <p className="text-[11px] text-text-muted mt-0.5">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-text-muted mt-0.5">{subtitle}</p>}
           </div>
           {action}
         </div>
