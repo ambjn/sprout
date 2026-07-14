@@ -9,7 +9,7 @@ import { RankedList } from "@/components/RankedList";
 import { RangePicker } from "@/components/RangePicker";
 import { IssuesTable } from "@/components/IssuesTable";
 import { SessionsTable } from "@/components/SessionsTable";
-import { STATUS_META } from "@/components/StatusSelect";
+import { ISSUE_STATUSES, STATUS_META } from "@/components/StatusSelect";
 import type { DashboardData, IssueRow } from "@/lib/types";
 
 const PAGE = "max-w-[1200px] mx-auto px-6 pt-8 pb-16";
@@ -108,8 +108,7 @@ export function App() {
       ? `${((sessions.filter((s) => s.errorCount === 0).length / sessions.length) * 100).toFixed(1)}%`
       : "—";
 
-  const issueStatuses: IssueRow["status"][] = ["open", "resolved", "ignored"];
-  const issueStatusSegments = issueStatuses.map((status) => ({
+  const issueStatusSegments = ISSUE_STATUSES.map((status) => ({
     label: STATUS_META[status].label,
     value: issues.filter((i) => i.status === status).length,
     color: STATUS_META[status].color,

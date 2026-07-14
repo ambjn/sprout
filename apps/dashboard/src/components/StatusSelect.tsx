@@ -9,7 +9,7 @@ export const STATUS_META: Record<
   ignored: { label: "Ignored", color: "var(--color-text-muted)" },
 };
 
-const STATUSES: IssueRow["status"][] = ["open", "resolved", "ignored"];
+export const ISSUE_STATUSES: IssueRow["status"][] = ["open", "resolved", "ignored"];
 
 /**
  * Issue status as a control. The visible pill is presentation only; an
@@ -38,7 +38,7 @@ export function StatusSelect({
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         aria-label="Issue status"
       >
-        {STATUSES.map((s) => (
+        {ISSUE_STATUSES.map((s) => (
           <option key={s} value={s}>
             {STATUS_META[s].label}
           </option>

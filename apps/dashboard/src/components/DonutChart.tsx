@@ -20,6 +20,17 @@ export function DonutChart({
 }) {
   const total = segments.reduce((sum, s) => sum + s.value, 0);
 
+  // Cumulative offset (in stroke length) at which each segment's arc starts.
+  let cumulative = 0;
+  const arcs = segments
+    .filter((s) => s.value > 0)
+    .map((s) => {
+      const length = (s.value / total) * CIRCUMFERENCE;
+      const dashoffset = -cumulative;
+      cumulative += length;
+      return { ...s, length, dashoffset };
+    });
+
   return (
     <Card title={title} subtitle={subtitle} className="h-full flex flex-col">
       {total === 0 ? (
@@ -45,30 +56,19 @@ export function DonutChart({
                 stroke="var(--color-gridline)"
                 strokeWidth={STROKE}
               />
-              {(() => {
-                let offset = 0;
-                return segments
-                  .filter((s) => s.value > 0)
-                  .map((s) => {
-                    const length = (s.value / total) * CIRCUMFERENCE;
-                    const dasharray = `${length} ${CIRCUMFERENCE - length}`;
-                    const dashoffset = -offset;
-                    offset += length;
-                    return (
-                      <circle
-                        key={s.label}
-                        cx={SIZE / 2}
-                        cy={SIZE / 2}
-                        r={RADIUS}
-                        fill="none"
-                        stroke={s.color}
-                        strokeWidth={STROKE}
-                        strokeDasharray={dasharray}
-                        strokeDashoffset={dashoffset}
-                      />
-                    );
-                  });
-              })()}
+              {arcs.map((arc) => (
+                <circle
+                  key={arc.label}
+                  cx={SIZE / 2}
+                  cy={SIZE / 2}
+                  r={RADIUS}
+                  fill="none"
+                  stroke={arc.color}
+                  strokeWidth={STROKE}
+                  strokeDasharray={`${arc.length} ${CIRCUMFERENCE - arc.length}`}
+                  strokeDashoffset={arc.dashoffset}
+                />
+              ))}
             </g>
             <text
               x={SIZE / 2}
