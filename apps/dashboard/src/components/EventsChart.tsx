@@ -6,10 +6,10 @@ type Point = { bucketStart: number; count: number };
 
 const WIDTH = 1040;
 const HEIGHT = 280;
-const PAD_LEFT = 36;
+const PAD_LEFT = 56;
 const PAD_RIGHT = 12;
 const PAD_TOP = 16;
-const PAD_BOTTOM = 28;
+const PAD_BOTTOM = 36;
 
 function niceMax(value: number): number {
   if (value <= 0) return 10;
@@ -65,7 +65,7 @@ export function EventsChart({
       ...p,
     }));
 
-    const ticks = [0, 0.5, 1].map((f) => ({
+    const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => ({
       value: Math.round(max * f),
       y: PAD_TOP + innerH * (1 - f),
     }));
@@ -134,12 +134,12 @@ export function EventsChart({
                 strokeWidth={1}
               />
               <text
-                x={PAD_LEFT - 8}
+                x={PAD_LEFT - 10}
                 y={tick.y}
                 textAnchor="end"
                 dominantBaseline="middle"
-                fontSize={10}
-                fill="var(--color-text-muted)"
+                fontSize={15}
+                fill="var(--color-text-secondary)"
               >
                 {tick.value.toLocaleString()}
               </text>
@@ -152,8 +152,8 @@ export function EventsChart({
               x={tick.x}
               y={HEIGHT - 8}
               textAnchor={i === 0 ? "start" : i === xTicks.length - 1 ? "end" : "middle"}
-              fontSize={10}
-              fill="var(--color-text-muted)"
+              fontSize={15}
+              fill="var(--color-text-secondary)"
             >
               {tick.label}
             </text>
@@ -175,10 +175,10 @@ export function EventsChart({
                 strokeWidth={2}
               />
               <text
-                x={last.x - 8}
-                y={last.y - 9}
+                x={last.x - 10}
+                y={last.y - 12}
                 textAnchor="end"
-                fontSize={11}
+                fontSize={15}
                 fontWeight={600}
                 fill="var(--color-text-secondary)"
               >
