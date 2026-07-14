@@ -32,10 +32,13 @@
     --color-gridline: #2c2c2a;
     --color-baseline: #383835;
     --color-line: rgba(255, 255, 255, 0.1);
+    /* Dark steps validated (lightness band L 0.48–0.67, chroma, CVD
+       separation, 3:1 contrast vs #1a1a19) — not an automatic flip of the
+       light palette. */
     --color-series-1: #3987e5;
-    --color-series-2: #5cc298;
-    --color-series-3: #e0a256;
-    --color-series-4: #a596ec;
+    --color-series-2: #2ea374;
+    --color-series-3: #c08236;
+    --color-series-4: #8f7ce0;
   }
 }
 

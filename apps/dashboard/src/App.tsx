@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { getDashboardData } from "@/lib/data";
 import { computeDelta } from "@/lib/format";
+import { RANGES, type RangeKey, DEFAULT_RANGE } from "@/lib/ranges";
 import { StatTile } from "@/components/StatTile";
 import { EventsChart } from "@/components/EventsChart";
 import { DonutChart } from "@/components/DonutChart";
 import { RankedList } from "@/components/RankedList";
+import { RangePicker } from "@/components/RangePicker";
 import { IssuesTable } from "@/components/IssuesTable";
 import { SessionsTable } from "@/components/SessionsTable";
 import { STATUS_META } from "@/components/StatusBadge";
@@ -25,17 +27,25 @@ function countBy<T>(items: T[], key: (item: T) => string): { name: string; count
 }
 
 export function App() {
+  const [range, setRange] = useState<RangeKey>(DEFAULT_RANGE);
   const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    getDashboardData().then((result) => {
-      if (!cancelled) setData(result);
+    setLoading(true);
+    getDashboardData(range).then((result) => {
+      if (!cancelled) {
+        setData(result);
+        setLoading(false);
+      }
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [range]);
+
+  const rangeDef = RANGES[range];
 
   if (!data) {
     return <main className={PAGE} />;
@@ -44,10 +54,10 @@ export function App() {
   const { overview, previousTotals, sessions, issues, isDemo } = data;
 
   const eventsDelta = previousTotals
-    ? computeDelta(overview.totals.events, previousTotals.events, "up")
+    ? computeDelta(overview.totals.events, previousTotals.events, "up", rangeDef.short)
     : null;
   const sessionsDelta = previousTotals
-    ? computeDelta(overview.totals.sessions, previousTotals.sessions, "up")
+    ? computeDelta(overview.totals.sessions, previousTotals.sessions, "up", rangeDef.short)
     : null;
 
   const crashFreePct =
@@ -82,11 +92,14 @@ export function App() {
 
   return (
     <main className={PAGE}>
-      <div className="flex items-baseline justify-between mb-6 flex-wrap gap-2">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-[22px] font-bold tracking-[-0.01em] m-0">Sprout</h1>
-          <p className="text-[13px] text-text-muted">Insights — last 24 hours</p>
+          <img src="./logo_transparent.png" alt="Sprout" className="h-9 w-auto" />
+          <p className="text-[13px] text-text-muted mt-1">
+            Insights — {rangeDef.label.toLowerCase()}
+          </p>
         </div>
+        <RangePicker value={range} onChange={setRange} />
       </div>
 
       {isDemo && (
@@ -97,7 +110,11 @@ export function App() {
         </div>
       )}
 
-      <div className="flex flex-col gap-4">
+      {/* Refetch keeps the frame: previous render stays up, dimmed, while the
+          new range loads -- no skeleton, no layout jump. */}
+      <div
+        className={`flex flex-col gap-4 transition-opacity ${loading ? "opacity-60" : "opacity-100"}`}
+      >
         <div className="grid grid-cols-4 gap-4 mb-4 max-[900px]:grid-cols-2 max-[720px]:grid-cols-1">
           <StatTile label="Events" value={overview.totals.events} delta={eventsDelta} />
           <StatTile label="Sessions" value={overview.totals.sessions} delta={sessionsDelta} />
@@ -107,7 +124,11 @@ export function App() {
 
         <p className={EYEBROW}>Trends</p>
         <div className="grid grid-cols-[2fr_1fr] gap-4 mb-4 items-start max-[900px]:grid-cols-1">
-          <EventsChart series={overview.series} />
+          <EventsChart
+            series={overview.series}
+            subtitle={rangeDef.label.toLowerCase()}
+            interval={rangeDef.interval}
+          />
           <DonutChart
             title="Issues by status"
             subtitle={`${issues.length} tracked`}

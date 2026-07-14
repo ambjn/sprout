@@ -1,19 +1,138 @@
-import type { DashboardData } from "./types";
+import { RANGES, type RangeKey, DEFAULT_RANGE } from "./ranges";
+import type { DashboardData, IssueRow, SessionRow } from "./types";
 
 // Realistic demo data matching the exact shapes getOverview/getSessions/
 // getIssues return, so the UI can be built and viewed correctly before a
-// live Convex deployment is wired up.
-export function buildFixtures(): DashboardData {
+// live Convex deployment is wired up. Deterministic (seeded) so the demo
+// looks the same on every load.
+
+function mulberry32(seed: number) {
+  return () => {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hex(rand: () => number, length: number): string {
+  return Array.from({ length }, () => "0123456789abcdef"[Math.floor(rand() * 16)]).join("");
+}
+
+function uuid(rand: () => number): string {
+  return `${hex(rand, 8)}-${hex(rand, 4)}-4${hex(rand, 3)}-${hex(rand, 4)}-${hex(rand, 12)}`;
+}
+
+function clerkId(rand: () => number): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789";
+  return `user_2${Array.from({ length: 26 }, () => alphabet[Math.floor(rand() * alphabet.length)]).join("")}`;
+}
+
+const DEVICES = [
+  { osName: "iOS", osVersion: "17.4", deviceModel: "iPhone15,3" },
+  { osName: "iOS", osVersion: "17.2", deviceModel: "iPhone14,5" },
+  { osName: "iOS", osVersion: "16.7", deviceModel: "iPhone12,1" },
+  { osName: "iOS", osVersion: "17.4", deviceModel: "iPad13,4" },
+  { osName: "Android", osVersion: "14", deviceModel: "Pixel 8" },
+  { osName: "Android", osVersion: "14", deviceModel: "Pixel 8 Pro" },
+  { osName: "Android", osVersion: "13", deviceModel: "SM-S911U" },
+  { osName: "Android", osVersion: "14", deviceModel: "SM-S928B" },
+];
+
+const VERSIONS = [
+  { appVersion: "2.4.2", buildNumber: "142" },
+  { appVersion: "2.4.2", buildNumber: "142" },
+  { appVersion: "2.4.1", buildNumber: "138" },
+  { appVersion: "2.3.9", buildNumber: "131" },
+];
+
+const SCREENS = [
+  "/",
+  "/discover",
+  "/settings",
+  "/grov/[id]",
+  "/profile/[clerkId]",
+  "/search",
+  "/notifications",
+];
+
+function buildSessions(now: number): SessionRow[] {
+  const rand = mulberry32(20260715);
+  const minute = 60 * 1000;
+  return Array.from({ length: 30 }, (_, i) => {
+    const startedAt = now - Math.round((rand() * 46 + i) * 60) * minute;
+    const durationMs = Math.round((rand() * 24 + 0.5) * minute);
+    const errorCount = rand() < 0.18 ? Math.ceil(rand() * 2) : 0;
+    return {
+      _id: `s${i + 1}`,
+      sessionId: uuid(rand),
+      entryScreen: SCREENS[Math.floor(rand() * SCREENS.length)],
+      exitScreen: SCREENS[Math.floor(rand() * SCREENS.length)],
+      eventCount: Math.ceil(rand() * 28) + errorCount,
+      errorCount,
+      startedAt,
+      // A few sessions look still-open (killed app, no session_end yet).
+      endedAt: rand() < 0.85 ? startedAt + durationMs : undefined,
+      identifiedUserId: rand() < 0.6 ? clerkId(rand) : undefined,
+      context: {
+        ...DEVICES[Math.floor(rand() * DEVICES.length)],
+        ...VERSIONS[Math.floor(rand() * VERSIONS.length)],
+      },
+    };
+  }).sort((a, b) => b.startedAt - a.startedAt);
+}
+
+function buildIssues(now: number): IssueRow[] {
+  const rand = mulberry32(982451653);
+  const hour = 60 * 60 * 1000;
+  const defs: [string, string, IssueRow["status"], number, number][] = [
+    // [errorType, message, status, occurrences, affected sessions]
+    ["TypeError", "Cannot read property 'foo' of undefined", "open", 12, 9],
+    ["Error", "Network request failed", "open", 47, 31],
+    ["TypeError", "null is not an object (evaluating 'route.params.id')", "open", 8, 6],
+    ["Invariant Violation", "Text strings must be rendered within a <Text> component", "open", 5, 5],
+    ["RangeError", "Maximum call stack size exceeded", "resolved", 1, 1],
+    ["Error", "WebSocket closed before connection established", "ignored", 3, 2],
+    ["SyntaxError", "JSON Parse error: Unexpected token '<'", "resolved", 6, 4],
+    ["Error", "AsyncStorage: database or disk is full", "open", 2, 2],
+    ["ReferenceError", "Property 'analytics' doesn't exist", "resolved", 9, 7],
+  ];
+  return defs
+    .map(([errorType, message, status, occurrenceCount, affectedSessionCount]) => {
+      const firstSeenAt = now - Math.round((rand() * 6 + 0.5) * 24 * hour);
+      const lastSeenAt = firstSeenAt + Math.round(rand() * (now - firstSeenAt));
+      return {
+        fingerprint: hex(rand, 16),
+        title: `${errorType}: ${message}`,
+        errorType,
+        sampleMessage: message,
+        occurrenceCount,
+        affectedSessionCount,
+        firstSeenAt,
+        lastSeenAt,
+        status,
+      };
+    })
+    .sort((a, b) => b.lastSeenAt - a.lastSeenAt);
+}
+
+export function buildFixtures(range: RangeKey = DEFAULT_RANGE): DashboardData {
   const now = Date.now();
   const hour = 60 * 60 * 1000;
-  const minute = 60 * 1000;
 
-  const series = Array.from({ length: 24 }, (_, i) => {
-    const hourOfDay = (now - (23 - i) * hour) / hour;
-    const wave = Math.sin((hourOfDay / 24) * Math.PI * 2 - 1.2) * 18 + 22;
-    const noise = (i * 37) % 11;
+  // One point per bucket of the selected range, same as getOverview returns.
+  const { ms, interval } = RANGES[range];
+  const bucketMs = interval === "hour" ? hour : 24 * hour;
+  const bucketCount = Math.round(ms / bucketMs);
+  const series = Array.from({ length: bucketCount }, (_, i) => {
+    const t = now - (bucketCount - 1 - i) * bucketMs;
+    const cycle = interval === "hour" ? t / (24 * hour) : t / (7 * 24 * hour);
+    const scale = interval === "hour" ? 1 : 14;
+    const wave = (Math.sin(cycle * Math.PI * 2 - 1.2) * 18 + 22) * scale;
+    const noise = ((i * 37) % 11) * scale;
     return {
-      bucketStart: now - (23 - i) * hour,
+      bucketStart: t,
       count: Math.max(0, Math.round(wave + noise)),
     };
   });
@@ -37,10 +156,10 @@ export function buildFixtures(): DashboardData {
         { name: "follow_created", count: 41 },
       ],
       topScreens: [
+        { name: "/grov/[id]", count: 512 },
         { name: "/discover", count: 402 },
         { name: "/", count: 298 },
         { name: "/settings", count: 133 },
-        { name: "/grov/[id]", count: 512 },
         { name: "/profile/[clerkId]", count: 87 },
       ],
     },
@@ -49,158 +168,7 @@ export function buildFixtures(): DashboardData {
       sessions: 189,
       errors: 4,
     },
-    sessions: [
-      {
-        _id: "s1",
-        sessionId: "9f2c1a-...-e4b1",
-        entryScreen: "/discover",
-        exitScreen: "/grov/[id]",
-        eventCount: 14,
-        errorCount: 0,
-        startedAt: now - 4 * minute,
-        endedAt: now - 1 * minute,
-        identifiedUserId: "user_8sk2n",
-        context: {
-          appVersion: "2.4.2",
-          buildNumber: "142",
-          osName: "iOS",
-          osVersion: "17.4",
-          deviceModel: "iPhone15,3",
-        },
-      },
-      {
-        _id: "s2",
-        sessionId: "7b0a3e-...-2c9d",
-        entryScreen: "/",
-        exitScreen: "/settings",
-        eventCount: 6,
-        errorCount: 1,
-        startedAt: now - 22 * minute,
-        endedAt: now - 20 * minute,
-        context: {
-          appVersion: "2.4.2",
-          buildNumber: "142",
-          osName: "Android",
-          osVersion: "14",
-          deviceModel: "Pixel 8",
-        },
-      },
-      {
-        _id: "s3",
-        sessionId: "4d8f61-...-a710",
-        entryScreen: "/discover",
-        exitScreen: "/discover",
-        eventCount: 22,
-        errorCount: 0,
-        startedAt: now - 55 * minute,
-        endedAt: now - 40 * minute,
-        identifiedUserId: "user_2mfa9",
-        context: {
-          appVersion: "2.4.1",
-          buildNumber: "138",
-          osName: "iOS",
-          osVersion: "17.2",
-          deviceModel: "iPhone14,5",
-        },
-      },
-      {
-        _id: "s4",
-        sessionId: "c391be-...-77f2",
-        entryScreen: "/grov/[id]",
-        exitScreen: "/grov/[id]",
-        eventCount: 9,
-        errorCount: 0,
-        startedAt: now - 2 * hour,
-        endedAt: now - 2 * hour + 6 * minute,
-        context: {
-          appVersion: "2.4.2",
-          buildNumber: "142",
-          osName: "Android",
-          osVersion: "13",
-          deviceModel: "SM-S911U",
-        },
-      },
-      {
-        _id: "s5",
-        sessionId: "12ab90-...-5f3c",
-        entryScreen: "/discover",
-        exitScreen: "/profile/[clerkId]",
-        eventCount: 11,
-        errorCount: 0,
-        startedAt: now - 3 * hour,
-        endedAt: now - 3 * hour + 8 * minute,
-        identifiedUserId: "user_71qzz",
-        context: {
-          appVersion: "2.4.1",
-          buildNumber: "138",
-          osName: "iOS",
-          osVersion: "17.4",
-          deviceModel: "iPhone15,3",
-        },
-      },
-      {
-        _id: "s6",
-        sessionId: "e02f77-...-90ad",
-        entryScreen: "/",
-        exitScreen: "/discover",
-        eventCount: 4,
-        errorCount: 1,
-        startedAt: now - 5 * hour,
-        endedAt: now - 5 * hour + 2 * minute,
-        context: {
-          appVersion: "2.4.2",
-          buildNumber: "142",
-          osName: "Android",
-          osVersion: "14",
-          deviceModel: "Pixel 8 Pro",
-        },
-      },
-    ],
-    issues: [
-      {
-        fingerprint: "a1b2c3",
-        title: "TypeError: Cannot read property 'foo' of undefined",
-        errorType: "TypeError",
-        sampleMessage: "Cannot read property 'foo' of undefined",
-        occurrenceCount: 12,
-        affectedSessionCount: 9,
-        firstSeenAt: now - 3 * 24 * hour,
-        lastSeenAt: now - 18 * minute,
-        status: "open",
-      },
-      {
-        fingerprint: "d4e5f6",
-        title: "Error: Network request failed",
-        errorType: "Error",
-        sampleMessage: "Network request failed",
-        occurrenceCount: 4,
-        affectedSessionCount: 4,
-        firstSeenAt: now - 8 * hour,
-        lastSeenAt: now - 3 * hour,
-        status: "open",
-      },
-      {
-        fingerprint: "g7h8i9",
-        title: "RangeError: Maximum call stack size exceeded",
-        errorType: "RangeError",
-        sampleMessage: "Maximum call stack size exceeded",
-        occurrenceCount: 1,
-        affectedSessionCount: 1,
-        firstSeenAt: now - 26 * hour,
-        lastSeenAt: now - 26 * hour,
-        status: "resolved",
-      },
-      {
-        fingerprint: "j0k1l2",
-        title: "Error: WebSocket closed before connection established",
-        errorType: "Error",
-        sampleMessage: "WebSocket closed before connection established",
-        occurrenceCount: 3,
-        affectedSessionCount: 2,
-        firstSeenAt: now - 5 * 24 * hour,
-        lastSeenAt: now - 2 * 24 * hour,
-        status: "ignored",
-      },
-    ],
+    sessions: buildSessions(now),
+    issues: buildIssues(now),
   };
 }

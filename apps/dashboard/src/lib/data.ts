@@ -1,9 +1,10 @@
 import { ConvexHttpClient } from "convex/browser";
 import { anyApi } from "convex/server";
 import { buildFixtures } from "./fixtures";
+import { RANGES, type RangeKey, DEFAULT_RANGE } from "./ranges";
 import type { DashboardData } from "./types";
 
-const HOUR_MS = 60 * 60 * 1000;
+const TABLE_LIMIT = 100;
 
 // Runs entirely client-side (see DASHBOARD.md) -- the dashboard key is
 // intentionally exposed to the browser bundle, unlike the old NEXT_PUBLIC_-less
@@ -16,31 +17,34 @@ const HOUR_MS = 60 * 60 * 1000;
 // injects them into index.html at serve time instead (see src/cli/dashboard.ts).
 // import.meta.env stays as the fallback for plain `bun run dev` against a local
 // .env, per STEPS.md.
-export async function getDashboardData(): Promise<DashboardData> {
+export async function getDashboardData(
+  range: RangeKey = DEFAULT_RANGE,
+): Promise<DashboardData> {
   const runtimeConfig = window.__SPROUT_CONFIG__;
   const convexUrl = runtimeConfig?.convexUrl ?? import.meta.env.VITE_CONVEX_URL;
   const dashboardKey = runtimeConfig?.dashboardKey ?? import.meta.env.VITE_SPROUT_DASHBOARD_KEY;
 
   if (!convexUrl || !dashboardKey) {
-    return buildFixtures();
+    return buildFixtures(range);
   }
 
   try {
     const client = new ConvexHttpClient(convexUrl);
+    const { ms, interval } = RANGES[range];
     const to = Date.now();
-    const from = to - 24 * HOUR_MS;
-    const previousFrom = from - 24 * HOUR_MS;
+    const from = to - ms;
+    const previousFrom = from - ms;
 
     const [overview, previousOverview, sessions, issues] = await Promise.all([
-      client.query(anyApi.sprout.overview, { dashboardKey, from, to, interval: "hour" }),
+      client.query(anyApi.sprout.overview, { dashboardKey, from, to, interval }),
       client.query(anyApi.sprout.overview, {
         dashboardKey,
         from: previousFrom,
         to: from,
-        interval: "hour",
+        interval,
       }),
-      client.query(anyApi.sprout.sessions, { dashboardKey, limit: 20 }),
-      client.query(anyApi.sprout.issues, { dashboardKey, limit: 20 }),
+      client.query(anyApi.sprout.sessions, { dashboardKey, limit: TABLE_LIMIT }),
+      client.query(anyApi.sprout.issues, { dashboardKey, limit: TABLE_LIMIT }),
     ]);
 
     return {
@@ -52,6 +56,6 @@ export async function getDashboardData(): Promise<DashboardData> {
     };
   } catch (error) {
     console.error("[Sprout dashboard] Falling back to demo data:", error);
-    return buildFixtures();
+    return buildFixtures(range);
   }
 }

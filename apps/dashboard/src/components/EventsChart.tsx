@@ -20,10 +20,39 @@ function niceMax(value: number): number {
   return step * magnitude;
 }
 
-export function EventsChart({ series }: { series: Point[] }) {
+function bucketLabel(ts: number, interval: "hour" | "day"): string {
+  return interval === "hour"
+    ? new Date(ts).toLocaleTimeString(undefined, { hour: "numeric" })
+    : new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function tooltipLabel(ts: number, interval: "hour" | "day"): string {
+  return interval === "hour"
+    ? new Date(ts).toLocaleString(undefined, {
+        hour: "numeric",
+        minute: "2-digit",
+        month: "short",
+        day: "numeric",
+      })
+    : new Date(ts).toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+}
+
+export function EventsChart({
+  series,
+  subtitle,
+  interval,
+}: {
+  series: Point[];
+  subtitle: string;
+  interval: "hour" | "day";
+}) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const { points, yTicks } = useMemo(() => {
+  const { points, yTicks, xTicks } = useMemo(() => {
     const max = niceMax(Math.max(1, ...series.map((p) => p.count)));
     const innerW = WIDTH - PAD_LEFT - PAD_RIGHT;
     const innerH = HEIGHT - PAD_TOP - PAD_BOTTOM;
@@ -40,8 +69,15 @@ export function EventsChart({ series }: { series: Point[] }) {
       y: PAD_TOP + innerH * (1 - f),
     }));
 
-    return { points: pts, yTicks: ticks };
-  }, [series]);
+    // Sparse time labels: first, quarter, mid, three-quarter, last bucket.
+    const xIdx =
+      pts.length > 1
+        ? [...new Set([0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(f * (pts.length - 1))))]
+        : [];
+    const xT = xIdx.map((i) => ({ x: pts[i].x, label: bucketLabel(pts[i].bucketStart, interval) }));
+
+    return { points: pts, yTicks: ticks, xTicks: xT };
+  }, [series, interval]);
 
   const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
   const areaPath =
@@ -70,14 +106,14 @@ export function EventsChart({ series }: { series: Point[] }) {
   return (
     <div className={CARD}>
       <p className="text-[13px] font-semibold text-text-secondary m-0 mb-4">
-        Events, last 24 hours
+        Events <span className="font-normal text-text-muted">· {subtitle}</span>
       </p>
       <div className="relative">
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           className="w-full h-auto block"
           role="img"
-          aria-label="Events over the last 24 hours"
+          aria-label={`Events, ${subtitle}`}
         >
           {yTicks.map((tick) => (
             <g key={tick.value}>
@@ -100,6 +136,19 @@ export function EventsChart({ series }: { series: Point[] }) {
                 {tick.value.toLocaleString()}
               </text>
             </g>
+          ))}
+
+          {xTicks.map((tick, i) => (
+            <text
+              key={`${tick.x}-${i}`}
+              x={tick.x}
+              y={HEIGHT - 8}
+              textAnchor={i === 0 ? "start" : i === xTicks.length - 1 ? "end" : "middle"}
+              fontSize={10}
+              fill="var(--color-text-muted)"
+            >
+              {tick.label}
+            </text>
           ))}
 
           <path d={areaPath} fill="var(--color-series-1)" opacity={0.1} />
@@ -149,14 +198,7 @@ export function EventsChart({ series }: { series: Point[] }) {
             <div className="font-semibold text-text-primary">
               {hovered.count.toLocaleString()} events
             </div>
-            <div className="text-text-muted">
-              {new Date(hovered.bucketStart).toLocaleString(undefined, {
-                hour: "numeric",
-                minute: "2-digit",
-                month: "short",
-                day: "numeric",
-              })}
-            </div>
+            <div className="text-text-muted">{tooltipLabel(hovered.bucketStart, interval)}</div>
           </div>
         )}
       </div>
