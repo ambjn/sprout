@@ -18,7 +18,7 @@ const BANNER = chalk.green(`
 
 const USAGE = [
   chalk.dim("insights on how your app is used, with none of the infra."),
-  chalk.dim("no ingestion service · no database · no SLA to babysit — just your Convex deployment."),
+  chalk.dim("· no ingestion service\n· no database\n· no SLA to babysit\njust your Convex deployment."),
   "",
   chalk.cyan.bold("USAGE"),
   `  ${chalk.green("sprout")} ${chalk.yellow("<command>")} ${chalk.dim("[options]")}`,
