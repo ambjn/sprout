@@ -94,9 +94,12 @@ export function App() {
     <main className={PAGE}>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <img src="./logo_transparent.png" alt="Sprout" className="h-9 w-auto" />
-          <p className="text-[13px] text-text-muted mt-1">
-            Insights — {rangeDef.label.toLowerCase()}
+          <img src="./logo_transparent.png" alt="Sprout" className="h-14 w-auto" />
+          <p className="text-[13px] text-text-secondary mt-2">
+            Insights on how your app is used, with none of the infra.
+          </p>
+          <p className="text-[11px] text-text-muted mt-1">
+            No ingestion service to run · No database to provision · No SLA to babysit
           </p>
         </div>
         <RangePicker value={range} onChange={setRange} />

@@ -1,9 +1,7 @@
 import { useMemo, useState } from "react";
+import { Card } from "./Card";
 
 type Point = { bucketStart: number; count: number };
-
-const CARD =
-  "bg-surface-1 border border-line rounded-xl p-5 shadow-[0_1px_2px_rgba(11,11,11,0.03),0_1px_8px_rgba(11,11,11,0.03)]";
 
 const WIDTH = 1040;
 const HEIGHT = 280;
@@ -18,6 +16,12 @@ function niceMax(value: number): number {
   const normalized = value / magnitude;
   const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
   return step * magnitude;
+}
+
+function formatCompact(value: number): string {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
+  return value.toLocaleString();
 }
 
 function bucketLabel(ts: number, interval: "hour" | "day"): string {
@@ -51,6 +55,8 @@ export function EventsChart({
   interval: "hour" | "day";
 }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
+  const total = useMemo(() => series.reduce((a, p) => a + p.count, 0), [series]);
 
   const { points, yTicks, xTicks } = useMemo(() => {
     const max = niceMax(Math.max(1, ...series.map((p) => p.count)));
@@ -86,6 +92,7 @@ export function EventsChart({
       : "";
 
   const hovered = hoverIndex !== null ? points[hoverIndex] : null;
+  const last = points.length > 0 ? points[points.length - 1] : null;
 
   function handleMove(e: React.PointerEvent<SVGRectElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -104,11 +111,17 @@ export function EventsChart({
   }
 
   return (
-    <div className={CARD}>
-      <p className="text-[13px] font-semibold text-text-secondary m-0 mb-4">
-        Events <span className="font-normal text-text-muted">· {subtitle}</span>
-      </p>
-      <div className="relative">
+    <Card
+      title="Events"
+      subtitle={subtitle}
+      action={
+        <span className="text-[13px] text-text-secondary [font-variant-numeric:tabular-nums]">
+          {formatCompact(total)} <span className="text-text-muted">total</span>
+        </span>
+      }
+      className="h-full flex flex-col"
+    >
+      <div className="relative flex-1">
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           className="w-full h-auto block"
@@ -153,6 +166,31 @@ export function EventsChart({
 
           <path d={areaPath} fill="var(--color-series-1)" opacity={0.1} />
           <path d={linePath} fill="none" stroke="var(--color-series-1)" strokeWidth={2} />
+
+          {/* Endpoint marker + selective direct label: the latest value is the
+              one readers scan for; everything else lives in the tooltip. */}
+          {last && !hovered && (
+            <>
+              <circle
+                cx={last.x}
+                cy={last.y}
+                r={4.5}
+                fill="var(--color-series-1)"
+                stroke="var(--color-surface-1)"
+                strokeWidth={2}
+              />
+              <text
+                x={last.x - 8}
+                y={last.y - 9}
+                textAnchor="end"
+                fontSize={11}
+                fontWeight={600}
+                fill="var(--color-text-secondary)"
+              >
+                {last.count.toLocaleString()}
+              </text>
+            </>
+          )}
 
           {hovered && (
             <>
@@ -202,6 +240,6 @@ export function EventsChart({
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

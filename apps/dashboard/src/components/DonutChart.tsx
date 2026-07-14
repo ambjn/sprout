@@ -1,7 +1,6 @@
-type Segment = { label: string; value: number; color: string };
+import { Card } from "./Card";
 
-const CARD =
-  "bg-surface-1 border border-line rounded-xl p-5 shadow-[0_1px_2px_rgba(11,11,11,0.03),0_1px_8px_rgba(11,11,11,0.03)]";
+type Segment = { label: string; value: number; color: string };
 
 const SIZE = 140;
 const STROKE = 18;
@@ -22,13 +21,13 @@ export function DonutChart({
   const total = segments.reduce((sum, s) => sum + s.value, 0);
 
   return (
-    <div className={CARD}>
-      <p className="text-[13px] font-semibold text-text-secondary m-0 mb-4">{title}</p>
-      {subtitle && <p className="-mt-2.5 mb-3.5 text-[11px] text-text-muted">{subtitle}</p>}
+    <Card title={title} subtitle={subtitle} className="h-full flex flex-col">
       {total === 0 ? (
-        <p className="text-text-muted py-4 px-2 text-center">No data yet</p>
+        <p className="text-text-muted py-4 px-2 text-center flex-1 flex items-center justify-center">
+          No data yet
+        </p>
       ) : (
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-5 flex-1">
           <svg
             width={SIZE}
             height={SIZE}
@@ -84,21 +83,28 @@ export function DonutChart({
             </text>
           </svg>
 
-          <div className="flex flex-col gap-2 min-w-0">
-            {segments.map((s) => (
-              <div key={s.label} className="flex items-center gap-2 text-[13px]">
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: s.color }} />
-                <span className="text-text-primary overflow-hidden text-ellipsis whitespace-nowrap">
-                  {s.label}
-                </span>
-                <span className="text-text-secondary ml-auto [font-variant-numeric:tabular-nums]">
-                  {s.value.toLocaleString()}
-                </span>
-              </div>
-            ))}
+          <div className="flex flex-col gap-2 min-w-0 flex-1">
+            {segments.map((s) => {
+              const pct = total > 0 ? Math.round((s.value / total) * 100) : 0;
+              return (
+                <div key={s.label} className="flex items-center gap-2 text-[13px]">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: s.color }}
+                  />
+                  <span className="text-text-primary overflow-hidden text-ellipsis whitespace-nowrap">
+                    {s.label}
+                  </span>
+                  <span className="text-text-secondary ml-auto [font-variant-numeric:tabular-nums] shrink-0">
+                    {s.value.toLocaleString()}
+                    <span className="text-text-muted"> · {pct}%</span>
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
