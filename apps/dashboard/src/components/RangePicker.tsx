@@ -25,10 +25,10 @@ export function RangePicker({
             type="button"
             aria-pressed={selected}
             onClick={() => onChange(key)}
-            className={`px-3 py-1 text-[13px] rounded-md transition-colors ${
+            className={`px-3.5 py-1.5 text-[13px] rounded-md transition-colors ${
               selected
-                ? "bg-gridline font-semibold text-text-primary"
-                : "text-text-secondary hover:text-text-primary"
+                ? "bg-text-primary text-surface-1 font-semibold"
+                : "text-text-secondary hover:text-text-primary hover:bg-gridline/50"
             }`}
             title={RANGES[key].label}
           >

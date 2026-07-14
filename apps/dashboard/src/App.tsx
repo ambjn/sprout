@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { getDashboardData } from "@/lib/data";
+import { useCallback, useEffect, useState } from "react";
+import { getDashboardData, updateIssueStatus } from "@/lib/data";
 import { computeDelta } from "@/lib/format";
 import { RANGES, type RangeKey, DEFAULT_RANGE } from "@/lib/ranges";
 import { StatTile } from "@/components/StatTile";
@@ -13,7 +13,17 @@ import { STATUS_META } from "@/components/StatusBadge";
 import type { DashboardData, IssueRow } from "@/lib/types";
 
 const PAGE = "max-w-[1200px] mx-auto px-6 pt-8 pb-16";
-const EYEBROW = "text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted mt-1 -mb-1.5";
+
+function SectionHeading({ children }: { children: string }) {
+  return (
+    <div className="flex items-center gap-3 mt-3 -mb-1">
+      <h2 className="text-xs font-semibold uppercase tracking-[0.08em] text-text-secondary m-0 shrink-0">
+        {children}
+      </h2>
+      <div className="flex-1 h-px bg-gridline" />
+    </div>
+  );
+}
 
 function countBy<T>(items: T[], key: (item: T) => string): { name: string; count: number }[] {
   const counts = new Map<string, number>();
@@ -44,6 +54,39 @@ export function App() {
       cancelled = true;
     };
   }, [range]);
+
+  // Optimistic: the row (and the "Issues by status" donut, derived from the
+  // same state) update immediately; a failed write reverts to the old status.
+  const handleIssueStatusChange = useCallback(
+    (fingerprint: string, status: IssueRow["status"]) => {
+      let previous: IssueRow["status"] | undefined;
+      setData((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          issues: current.issues.map((issue) => {
+            if (issue.fingerprint !== fingerprint) return issue;
+            previous = issue.status;
+            return { ...issue, status };
+          }),
+        };
+      });
+      void updateIssueStatus(fingerprint, status).then((ok) => {
+        if (ok || previous === undefined) return;
+        const revertTo = previous;
+        setData((current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            issues: current.issues.map((issue) =>
+              issue.fingerprint === fingerprint ? { ...issue, status: revertTo } : issue,
+            ),
+          };
+        });
+      });
+    },
+    [],
+  );
 
   const rangeDef = RANGES[range];
 
@@ -94,13 +137,27 @@ export function App() {
     <main className={PAGE}>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <img src="./logo_transparent.png" alt="Sprout" className="h-14 w-auto" />
-          <p className="text-[13px] text-text-secondary mt-2">
+          <img src="./logo_transparent.png" alt="Sprout" className="h-16 w-auto" />
+          <p className="text-[15px] text-text-primary mt-2.5">
             Insights on how your app is used, with none of the infra.
           </p>
-          <p className="text-[11px] text-text-muted mt-1">
-            No ingestion service to run · No database to provision · No SLA to babysit
-          </p>
+          <div className="flex flex-wrap gap-2 mt-2.5">
+            {[
+              "No ingestion service to run",
+              "No database to provision",
+              "No SLA to babysit",
+            ].map((point) => (
+              <span
+                key={point}
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-1 px-2.5 py-1 text-xs text-text-secondary"
+              >
+                <span aria-hidden className="text-status-good font-semibold">
+                  ✓
+                </span>
+                {point}
+              </span>
+            ))}
+          </div>
         </div>
         <RangePicker value={range} onChange={setRange} />
       </div>
@@ -125,8 +182,8 @@ export function App() {
           <StatTile label="Crash-free sessions" value={crashFreePct} />
         </div>
 
-        <p className={EYEBROW}>Trends</p>
-        <div className="grid grid-cols-[2fr_1fr] gap-4 mb-4 items-start max-[900px]:grid-cols-1">
+        <SectionHeading>Trends</SectionHeading>
+        <div className="grid grid-cols-[2fr_1fr] gap-4 mb-4 items-stretch max-[900px]:grid-cols-1">
           <EventsChart
             series={overview.series}
             subtitle={rangeDef.label.toLowerCase()}
@@ -140,13 +197,13 @@ export function App() {
           />
         </div>
 
-        <p className={EYEBROW}>Breakdown</p>
-        <div className="grid grid-cols-2 gap-4 mb-4 max-[720px]:grid-cols-1">
+        <SectionHeading>Breakdown</SectionHeading>
+        <div className="grid grid-cols-2 gap-4 mb-4 items-stretch max-[720px]:grid-cols-1">
           <RankedList title="Top events" rows={overview.topEvents} />
           <RankedList title="Top screens" rows={overview.topScreens} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4 max-[720px]:grid-cols-1">
+        <div className="grid grid-cols-2 gap-4 mb-4 items-stretch max-[720px]:grid-cols-1">
           <DonutChart
             title="Platforms"
             subtitle={`Last ${sessions.length} sessions`}
@@ -160,8 +217,8 @@ export function App() {
           />
         </div>
 
-        <p className={EYEBROW}>Activity</p>
-        <IssuesTable rows={issues} />
+        <SectionHeading>Activity</SectionHeading>
+        <IssuesTable rows={issues} onStatusChange={handleIssueStatusChange} />
         <SessionsTable rows={sessions} />
       </div>
     </main>

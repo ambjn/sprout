@@ -21,7 +21,13 @@ export function StatusBadge({ status }: { status: IssueRow["status"] }) {
   );
 }
 
-/** The badge as a control: a native select styled to the badge chrome. */
+/**
+ * The badge as a control. The visible pill is presentation only; an
+ * invisible native select stretched over the WHOLE pill receives the click,
+ * so the picker opens no matter where on the pill you press (a select's own
+ * clickable area is just its text — a wrapping label focuses but doesn't
+ * open it).
+ */
 export function StatusSelect({
   value,
   onChange,
@@ -31,13 +37,16 @@ export function StatusSelect({
 }) {
   const meta = STATUS_META[value];
   return (
-    <label className="inline-flex items-center gap-[5px] text-xs font-medium py-0.5 px-2 rounded-full text-text-secondary border border-transparent hover:border-gridline cursor-pointer">
+    <span className="relative inline-flex items-center gap-[5px] text-xs font-medium py-0.5 px-2 rounded-full text-text-secondary border border-gridline/70 hover:border-baseline cursor-pointer">
       <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: meta.color }} />
+      {meta.label}
+      <span aria-hidden className="text-text-muted text-[9px]">
+        ▾
+      </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as IssueRow["status"])}
-        onClick={(e) => e.stopPropagation()}
-        className="appearance-none bg-transparent cursor-pointer focus:outline-none text-text-secondary"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         aria-label="Issue status"
       >
         {STATUSES.map((s) => (
@@ -46,9 +55,6 @@ export function StatusSelect({
           </option>
         ))}
       </select>
-      <span aria-hidden className="text-text-muted text-[9px]">
-        ▾
-      </span>
-    </label>
+    </span>
   );
 }
