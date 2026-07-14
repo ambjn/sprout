@@ -167,9 +167,7 @@ export function App() {
 
       {isDemo && (
         <div className="bg-surface-1 border border-line border-l-[3px] border-l-status-warning rounded-lg py-2.5 px-3.5 text-[13px] text-text-secondary mb-6">
-          Showing demo data — set <code className="font-mono">VITE_CONVEX_URL</code> and{" "}
-          <code className="font-mono">VITE_SPROUT_DASHBOARD_KEY</code> in <code className="font-mono">.env</code> to connect
-          to a real deployment.
+          This dashboard is showing sample data for demonstration purposes.
         </div>
       )}
 
