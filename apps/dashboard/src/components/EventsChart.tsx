@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Card } from "./Card";
+import { formatCompact } from "@/lib/format";
 
 type Point = { bucketStart: number; count: number };
 
@@ -16,12 +17,6 @@ function niceMax(value: number): number {
   const normalized = value / magnitude;
   const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
   return step * magnitude;
-}
-
-function formatCompact(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return value.toLocaleString();
 }
 
 function bucketLabel(ts: number, interval: "hour" | "day"): string {

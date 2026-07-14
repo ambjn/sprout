@@ -12,6 +12,9 @@ export type Column<T> = {
   className?: string;
 };
 
+/** Shared empty-value marker for table cells. */
+export const UNSET = <span className="italic text-text-muted">—</span>;
+
 const TH =
   "sticky top-0 z-10 bg-surface-1 text-left font-semibold text-text-muted text-[11px] uppercase tracking-[0.03em] py-2 px-3 border-b border-r border-gridline last:border-r-0 whitespace-nowrap overflow-hidden text-ellipsis";
 const TD =

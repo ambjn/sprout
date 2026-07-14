@@ -9,7 +9,7 @@ import { RankedList } from "@/components/RankedList";
 import { RangePicker } from "@/components/RangePicker";
 import { IssuesTable } from "@/components/IssuesTable";
 import { SessionsTable } from "@/components/SessionsTable";
-import { STATUS_META } from "@/components/StatusBadge";
+import { STATUS_META } from "@/components/StatusSelect";
 import type { DashboardData, IssueRow } from "@/lib/types";
 
 const PAGE = "max-w-[1200px] mx-auto px-6 pt-8 pb-16";
@@ -135,7 +135,7 @@ export function App() {
 
   return (
     <main className={PAGE}>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
         <div>
           <img src="./logo_transparent.png" alt="Sprout" className="h-16 w-auto" />
           <p className="text-[15px] text-text-primary mt-2.5">
@@ -159,7 +159,11 @@ export function App() {
             ))}
           </div>
         </div>
-        <RangePicker value={range} onChange={setRange} />
+        {/* items-start + optical nudge: level with the logo row, not centered
+            against the whole tagline/chips block. */}
+        <div className="mt-3.5">
+          <RangePicker value={range} onChange={setRange} />
+        </div>
       </div>
 
       {isDemo && (

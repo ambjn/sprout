@@ -30,8 +30,11 @@ export function formatDuration(ms: number): string {
   return `${hours}h ${minutes % 60}m`;
 }
 
-export function shortId(id: string): string {
-  return id.length > 12 ? `${id.slice(0, 6)}…${id.slice(-4)}` : id;
+/** 1284 → "1.3K", 4200000 → "4.2M" — for stat tiles and chart headers. */
+export function formatCompact(value: number): string {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
+  return value.toLocaleString();
 }
 
 export type Delta = { pct: number | null; isGood: boolean; label: string };

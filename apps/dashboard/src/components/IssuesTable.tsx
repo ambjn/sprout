@@ -2,10 +2,8 @@ import { useMemo } from "react";
 import type { IssueRow } from "@/lib/types";
 import { absoluteTime, relativeTime } from "@/lib/format";
 import { Card } from "./Card";
-import { DataTable, type Column } from "./DataTable";
-import { StatusSelect } from "./StatusBadge";
-
-const UNSET = <span className="italic text-text-muted">—</span>;
+import { DataTable, UNSET, type Column } from "./DataTable";
+import { StatusSelect } from "./StatusSelect";
 
 export function IssuesTable({
   rows,

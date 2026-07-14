@@ -11,22 +11,11 @@ export const STATUS_META: Record<
 
 const STATUSES: IssueRow["status"][] = ["open", "resolved", "ignored"];
 
-export function StatusBadge({ status }: { status: IssueRow["status"] }) {
-  const meta = STATUS_META[status];
-  return (
-    <span className="inline-flex items-center gap-[5px] text-xs font-medium py-0.5 px-2 rounded-full text-text-secondary">
-      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: meta.color }} />
-      {meta.label}
-    </span>
-  );
-}
-
 /**
- * The badge as a control. The visible pill is presentation only; an
+ * Issue status as a control. The visible pill is presentation only; an
  * invisible native select stretched over the WHOLE pill receives the click,
  * so the picker opens no matter where on the pill you press (a select's own
- * clickable area is just its text — a wrapping label focuses but doesn't
- * open it).
+ * clickable area is just its text).
  */
 export function StatusSelect({
   value,

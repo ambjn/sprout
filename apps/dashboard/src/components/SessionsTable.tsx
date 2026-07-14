@@ -1,9 +1,7 @@
 import type { SessionRow } from "@/lib/types";
 import { absoluteTime, formatDuration, platformLabel, relativeTime } from "@/lib/format";
 import { Card } from "./Card";
-import { DataTable, type Column } from "./DataTable";
-
-const UNSET = <span className="italic text-text-muted">—</span>;
+import { DataTable, UNSET, type Column } from "./DataTable";
 
 const COLUMNS: Column<SessionRow>[] = [
   {

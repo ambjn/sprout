@@ -1,11 +1,5 @@
 import { Card } from "./Card";
-import type { Delta } from "@/lib/format";
-
-function formatCompact(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return value.toLocaleString();
-}
+import { formatCompact, type Delta } from "@/lib/format";
 
 export function StatTile({
   label,
