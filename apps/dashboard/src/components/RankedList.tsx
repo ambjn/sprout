@@ -1,5 +1,4 @@
-const CARD =
-  "bg-surface-1 border border-line rounded-xl p-5 shadow-[0_1px_2px_rgba(11,11,11,0.03),0_1px_8px_rgba(11,11,11,0.03)]";
+import { Card } from "./Card";
 
 export function RankedList({
   title,
@@ -12,9 +11,7 @@ export function RankedList({
 }) {
   const max = Math.max(1, ...rows.map((r) => r.count));
   return (
-    <div className={CARD}>
-      <p className="text-[13px] font-semibold text-text-secondary m-0 mb-4">{title}</p>
-      {subtitle && <p className="-mt-2.5 mb-3.5 text-[11px] text-text-muted">{subtitle}</p>}
+    <Card title={title} subtitle={subtitle} className="h-full">
       {rows.length === 0 ? (
         <p className="text-text-muted py-4 px-2 text-center">No data yet</p>
       ) : (
@@ -39,6 +36,6 @@ export function RankedList({
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

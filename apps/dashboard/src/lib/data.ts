@@ -2,7 +2,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { anyApi } from "convex/server";
 import { buildFixtures } from "./fixtures";
 import { RANGES, type RangeKey, DEFAULT_RANGE } from "./ranges";
-import type { DashboardData } from "./types";
+import type { DashboardData, IssueRow } from "./types";
 
 const TABLE_LIMIT = 100;
 
@@ -17,19 +17,25 @@ const TABLE_LIMIT = 100;
 // injects them into index.html at serve time instead (see src/cli/dashboard.ts).
 // import.meta.env stays as the fallback for plain `bun run dev` against a local
 // .env, per STEPS.md.
-export async function getDashboardData(
-  range: RangeKey = DEFAULT_RANGE,
-): Promise<DashboardData> {
+function resolveConfig(): { convexUrl: string; dashboardKey: string } | null {
   const runtimeConfig = window.__SPROUT_CONFIG__;
   const convexUrl = runtimeConfig?.convexUrl ?? import.meta.env.VITE_CONVEX_URL;
   const dashboardKey = runtimeConfig?.dashboardKey ?? import.meta.env.VITE_SPROUT_DASHBOARD_KEY;
+  if (!convexUrl || !dashboardKey) return null;
+  return { convexUrl, dashboardKey };
+}
 
-  if (!convexUrl || !dashboardKey) {
+export async function getDashboardData(
+  range: RangeKey = DEFAULT_RANGE,
+): Promise<DashboardData> {
+  const config = resolveConfig();
+  if (!config) {
     return buildFixtures(range);
   }
 
   try {
-    const client = new ConvexHttpClient(convexUrl);
+    const client = new ConvexHttpClient(config.convexUrl);
+    const { dashboardKey } = config;
     const { ms, interval } = RANGES[range];
     const to = Date.now();
     const from = to - ms;
@@ -57,5 +63,31 @@ export async function getDashboardData(
   } catch (error) {
     console.error("[Sprout dashboard] Falling back to demo data:", error);
     return buildFixtures(range);
+  }
+}
+
+/**
+ * Persist an issue-status change via the host's `sprout:setIssueStatus`
+ * mutation. Returns true when the write landed (or when running against
+ * demo data, where a local-only change is the correct behavior).
+ */
+export async function updateIssueStatus(
+  fingerprint: string,
+  status: IssueRow["status"],
+): Promise<boolean> {
+  const config = resolveConfig();
+  if (!config) return true; // demo mode: keep the optimistic local change
+
+  try {
+    const client = new ConvexHttpClient(config.convexUrl);
+    await client.mutation(anyApi.sprout.setIssueStatus, {
+      dashboardKey: config.dashboardKey,
+      fingerprint,
+      status,
+    });
+    return true;
+  } catch (error) {
+    console.error("[Sprout dashboard] Failed to update issue status:", error);
+    return false;
   }
 }

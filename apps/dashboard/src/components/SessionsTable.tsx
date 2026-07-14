@@ -1,9 +1,7 @@
 import type { SessionRow } from "@/lib/types";
 import { absoluteTime, formatDuration, platformLabel, relativeTime } from "@/lib/format";
+import { Card } from "./Card";
 import { DataTable, type Column } from "./DataTable";
-
-const CARD =
-  "bg-surface-1 border border-line rounded-xl p-5 shadow-[0_1px_2px_rgba(11,11,11,0.03),0_1px_8px_rgba(11,11,11,0.03)]";
 
 const UNSET = <span className="italic text-text-muted">—</span>;
 
@@ -89,17 +87,16 @@ const COLUMNS: Column<SessionRow>[] = [
 
 export function SessionsTable({ rows }: { rows: SessionRow[] }) {
   return (
-    <div className={CARD}>
-      <div className="flex items-baseline justify-between mb-3">
-        <p className="text-[13px] font-semibold text-text-secondary m-0">Recent sessions</p>
-        <span className="text-[11px] text-text-muted">{rows.length} rows</span>
-      </div>
+    <Card
+      title="Recent sessions"
+      action={<span className="text-[11px] text-text-muted">{rows.length} rows</span>}
+    >
       <DataTable
         columns={COLUMNS}
         rows={rows}
         rowKey={(row) => row._id}
         emptyMessage="No sessions yet"
       />
-    </div>
+    </Card>
   );
 }
