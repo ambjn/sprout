@@ -24,7 +24,7 @@ export type SproutComponent = {
   public: {
     createApp: FunctionReference<
       "mutation",
-      "internal",
+      "public",
       {
         slug: string;
         name: string;
@@ -36,54 +36,48 @@ export type SproutComponent = {
     >;
     ingestBatch: FunctionReference<
       "mutation",
-      "internal",
+      "public",
       { writeKeyHash: string; batchId?: string; events: any[] },
       any
     >;
     getOverview: FunctionReference<
       "query",
-      "internal",
+      "public",
       { slug: string; from: number; to: number; interval: "hour" | "day" },
       any
     >;
     getRecentEvents: FunctionReference<
       "query",
-      "internal",
+      "public",
       { slug: string; limit?: number; eventType?: EventType },
       any
     >;
     getSessions: FunctionReference<
       "query",
-      "internal",
+      "public",
       { slug: string; limit?: number },
       any
     >;
     getIssues: FunctionReference<
       "query",
-      "internal",
+      "public",
       { slug: string; status?: IssueStatus; limit?: number },
       any
     >;
     getIssueDetail: FunctionReference<
       "query",
-      "internal",
+      "public",
       { slug: string; fingerprint: string; eventLimit?: number },
       any
     >;
     setIssueStatus: FunctionReference<
       "mutation",
-      "internal",
+      "public",
       {
         slug: string;
         fingerprint: string;
         status: IssueStatus;
       },
-      any
-    >;
-    inspectRollups: FunctionReference<
-      "query",
-      "internal",
-      { slug: string; interval: "hour" | "day"; dimension: string; key: string },
       any
     >;
   };
