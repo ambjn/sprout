@@ -1,6 +1,6 @@
 {
   "name": "@sprout-convex/analytics",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Product analytics + error tracking for Expo apps, running inside your own Convex deployment.",
   "license": "Apache-2.0",
   "author": "Amber J",
