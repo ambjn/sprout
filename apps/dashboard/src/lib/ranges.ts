@@ -3,7 +3,7 @@ const DAY_MS = 24 * HOUR_MS;
 
 export type RangeKey = "24h" | "7d" | "30d" | "90d";
 
-export type RangeDef = {
+type RangeDef = {
   /** Human label for headers ("Last 7 days"). */
   label: string;
   /** Short label for the delta line ("vs prior 7d"). */
