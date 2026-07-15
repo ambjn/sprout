@@ -129,8 +129,9 @@ export default function RootLayout() {
 All four calls below are fire-and-forget (no `await`) and queue onto the
 same offline-durable buffer `initSprout` sets up: batched, retried with
 exactly-once ingest, nothing lost across app kills or dropped connectivity.
-Property values are restricted to `string | number | boolean | null`, so
-keep them flat (no nested objects/arrays).
+Property values are restricted to the exported `PropertyValue` type
+(`string | number | boolean | null`), so keep them flat (no nested
+objects/arrays).
 
 ### `track`: custom events
 
@@ -193,6 +194,8 @@ Uncaught JS errors and fatal exceptions are captured automatically once
 already catches and swallows, so they still show up as an issue:
 
 ```tsx
+import { captureException } from "@sprout-convex/analytics";
+
 const loadProfile = async (userId: string) => {
   try {
     return await api.getProfile(userId);
@@ -215,6 +218,24 @@ class ScreenErrorBoundary extends React.Component<Props, State> {
   // ...
 }
 ```
+
+### Advanced: `getSprout` / `shutdownSprout`
+
+```tsx
+import { getSprout, shutdownSprout } from "@sprout-convex/analytics";
+
+const handleLogout = () => {
+  shutdownSprout();
+  signOut();
+};
+```
+
+- **`getSprout()`** returns the underlying `SproutCore` instance, or `null`
+  before `initSprout` resolves. An escape hatch for cases the top-level
+  `track`/`screen`/`identify`/`captureException` calls don't cover.
+- **`shutdownSprout()`** stops the flush timer and unhooks `AppState`/error
+  listeners, useful on logout or account switch. The on-device queue isn't
+  cleared, so a later `initSprout()` picks up right where it left off.
 
 ## Configuration
 
