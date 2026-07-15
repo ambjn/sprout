@@ -115,18 +115,6 @@ const issueDoc = v.object({
   status: issueStatusValidator,
 });
 
-const rollupDoc = v.object({
-  _id: v.id("rollups"),
-  _creationTime: v.number(),
-  appId: v.id("apps"),
-  interval: intervalValidator,
-  bucketStart: v.number(),
-  dimension: v.string(),
-  key: v.string(),
-  shard: v.number(),
-  count: v.number(),
-});
-
 const keyCountValidator = v.object({ name: v.string(), count: v.number() });
 
 /** Expected ingest failures carry a machine-readable code the HTTP layer maps
@@ -769,30 +757,5 @@ export const setIssueStatus = mutation({
     if (!issue) throw new Error(`Unknown issue: ${fingerprint}`);
     await ctx.db.patch(issue._id, { status });
     return null;
-  },
-});
-
-// Test/debug surface: raw shard rows for one rollup key, so tests can assert
-// that writes actually spread across shards.
-export const inspectRollups = query({
-  args: {
-    slug: v.string(),
-    interval: intervalValidator,
-    dimension: v.string(),
-    key: v.string(),
-  },
-  returns: v.array(rollupDoc),
-  handler: async (ctx, { slug, interval, dimension, key }) => {
-    const app = await requireApp(ctx, slug);
-    return await ctx.db
-      .query("rollups")
-      .withIndex("by_key_shard", (q: any) =>
-        q
-          .eq("appId", app._id)
-          .eq("interval", interval)
-          .eq("dimension", dimension)
-          .eq("key", key),
-      )
-      .collect();
   },
 });

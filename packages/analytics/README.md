@@ -1,16 +1,3 @@
-```
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~                                          ~
-~                                _         ~
-~      ___ _ __  _ __ ___  _   _| |_       ~
-~     / __| '_ \| '__/ _ \| | | | __|      ~
-~     \__ \ |_) | | | (_) | |_| | |_       ~
-~     |___/ .__/|_|  \___/ \__,_|\__|      ~
-~         |_|                              ~
-~                                          ~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-```
-
 # @sprout-convex/analytics
 
 Insights on how your React Native Expo app is used, with none of the infra.
@@ -52,11 +39,11 @@ bun add @sprout-convex/analytics
 
 ## Quick start
 
-From your app's root (a Convex + Expo project with `npx convex dev` already
+From your app's root (a Convex + Expo project with `bunx convex dev` already
 set up):
 
 ```sh
-npx sprout init
+bunx sprout init
 ```
 
 This mounts the component, generates a write key and dashboard key, wires the
@@ -91,7 +78,7 @@ export default http;
 
 ```ts
 // convex/sproutSetup.ts — one-time registration, run via
-// `npx convex run sproutSetup:register '{"writeKey":"..."}'`
+// `bunx convex run sproutSetup:register '{"writeKey":"..."}'`
 import { internalMutation } from "./_generated/server";
 import { Sprout } from "@sprout-convex/analytics/client";
 import { components } from "./_generated/api";
@@ -130,7 +117,7 @@ track("game_started", { level: 3 });
 Once events are flowing, launch the dashboard from your app's root directory:
 
 ```sh
-npx sprout dashboard
+bunx sprout dashboard
 ```
 
 ## License

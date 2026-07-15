@@ -1,7 +1,7 @@
 {
   "name": "@sprout-convex/analytics",
-  "version": "0.0.2",
-  "description": "Product analytics + error tracking for Expo apps, running inside your own Convex deployment.",
+  "version": "1.0.0",
+  "description": "Insights on how your React Native Expo app is used, with none of the infra.",
   "license": "Apache-2.0",
   "author": "Amber J",
   "repository": {
@@ -9,7 +9,7 @@
     "url": "git+https://github.com/ambjn/sprout.git",
     "directory": "packages/analytics"
   },
-  "homepage": "https://github.com/ambjn/sprout#readme",
+  "homepage": "https://github.com/ambjn/sprout/blob/main/packages/analytics/README.md",
   "bugs": {
     "url": "https://github.com/ambjn/sprout/issues"
   },
