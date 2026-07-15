@@ -57,10 +57,12 @@ bun run test        # bun test across the monorepo
 bun run typecheck   # typechecks every workspace package
 ```
 
+Kept in sync by hand with [`packages/analytics/README.md`](./packages/analytics/README.md)
+(the source of truth for the published package); the section below is what
+convex.dev/components scrapes from the repo root, so it's mirrored here in
+full.
+
 <!-- START: Include on https://convex.dev/components -->
-<!-- Kept in sync by hand with packages/analytics/README.md (the source of
-     truth for the published package); this is what convex.dev/components
-     scrapes from the repo root, so it's mirrored here in full. -->
 
 [![npm](https://img.shields.io/npm/v/@sprout-convex/analytics)](https://www.npmjs.com/package/@sprout-convex/analytics)
 [![license](https://img.shields.io/npm/l/@sprout-convex/analytics)](./LICENSE)
@@ -364,10 +366,10 @@ npx convex run sproutSetup:register '{"writeKey":"<existing write key>","ingestE
 Both are optional and additive to the one-time call from
 [Quick start](#quick-start).
 
+<!-- END: Include on https://convex.dev/components -->
+
 Full package README (same content, kept as the package's own docs page on
 npm): [`packages/analytics/README.md`](./packages/analytics/README.md).
-
-<!-- END: Include on https://convex.dev/components -->
 
 ## License
 
