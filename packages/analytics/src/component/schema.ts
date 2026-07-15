@@ -31,6 +31,10 @@ export default defineSchema({
   // Ingest idempotency: one row per accepted batch id. The SDK retries a
   // batch with the same id until acked, so a batch whose response was lost
   // is skipped instead of double-counted.
+  // Known limitation: this table has no TTL/cleanup, so it grows unbounded
+  // with ingest volume. A retried batch only needs to be deduped within the
+  // SDK's own retry window (flushIntervalMs-scale), so old rows are safe to
+  // prune; there's just no scheduled job doing that yet.
   batches: defineTable({
     appId: v.id("apps"),
     batchId: v.string(),

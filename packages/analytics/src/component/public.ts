@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server.js";
+import type { MutationCtx, QueryCtx } from "./_generated/server.js";
 import type { Id } from "./_generated/dataModel.js";
 import { MAX_BATCH_SIZE, SHARD_COUNT } from "./constants.js";
 import {
@@ -434,7 +435,7 @@ export const ingestBatch = mutation({
 });
 
 async function upsertSession(
-  ctx: { db: any },
+  ctx: MutationCtx,
   appId: Id<"apps">,
   sessionId: string,
   agg: SessionAgg,
@@ -481,7 +482,7 @@ async function upsertSession(
 }
 
 async function upsertIssue(
-  ctx: { db: any },
+  ctx: MutationCtx,
   appId: Id<"apps">,
   fingerprint: string,
   agg: IssueAgg,
@@ -532,7 +533,7 @@ async function upsertIssue(
 // Read API (powers the dashboard)
 // ---------------------------------------------------------------------------
 
-async function requireApp(ctx: { db: any }, slug: string) {
+async function requireApp(ctx: QueryCtx | MutationCtx, slug: string) {
   const app = await ctx.db
     .query("apps")
     .withIndex("by_slug", (q: any) => q.eq("slug", slug))
@@ -542,7 +543,7 @@ async function requireApp(ctx: { db: any }, slug: string) {
 }
 
 async function sumRollupRange(
-  ctx: { db: any },
+  ctx: QueryCtx,
   appId: Id<"apps">,
   interval: Interval,
   dimension: string,

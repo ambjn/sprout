@@ -1,6 +1,6 @@
 {
   "name": "@sprout-convex/analytics",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Insights on how your React Native Expo app is used, with none of the infra.",
   "license": "Apache-2.0",
   "author": "Amber J",
@@ -52,6 +52,13 @@
     "./hooks": {
       "types": "./dist/sprout-expo/hooks.d.ts",
       "default": "./dist/sprout-expo/hooks.js"
+    },
+    "./_generated/component.js": {
+      "types": "./dist/component/_generated/component.d.ts"
+    },
+    "./test": {
+      "types": "./dist/test.d.ts",
+      "default": "./dist/test.js"
     }
   },
   "scripts": {
