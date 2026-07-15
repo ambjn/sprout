@@ -1,5 +1,3 @@
-![Sprout](../../apps/dashboard/public/logo_transparent.png)
-
 # @sprout-convex/analytics
 
 [![npm](https://img.shields.io/npm/v/@sprout-convex/analytics)](https://www.npmjs.com/package/@sprout-convex/analytics)
