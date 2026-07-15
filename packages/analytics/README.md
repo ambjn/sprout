@@ -11,8 +11,8 @@ screen tracking, custom events, and error tracking with fingerprinted issues,
 breadcrumbs, and stack traces — all running inside your own Convex
 deployment, so your data never leaves it.
 
-> **Status: pre-1.0.** The SDK, Convex component, CLI, and dashboard are all
-> implemented and work end-to-end — APIs may still shift before 0.1.0.
+> **Status: 1.0.** The SDK, Convex component, CLI, and dashboard are all
+> implemented and work end-to-end. This is the first stable release.
 
 ## What you get
 
