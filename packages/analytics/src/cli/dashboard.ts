@@ -134,10 +134,27 @@ export async function runDashboard(argv: string[]): Promise<void> {
 
   const slug =
     args.slug ?? process.env.SPROUT_SLUG ?? (await prompt(chalk.cyan("App slug registered with Sprout: ")));
+  if (!slug) {
+    console.error(
+      chalk.red("✖ No slug provided.") +
+        `\n  Pass ${chalk.yellow("--slug <slug>")} or set ${chalk.yellow("SPROUT_SLUG")}.`,
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   const dashboardKey =
     args.dashboardKey ??
     process.env.SPROUT_DASHBOARD_KEY ??
     (await prompt(chalk.cyan("SPROUT_DASHBOARD_KEY ") + chalk.dim("(npx convex env get SPROUT_DASHBOARD_KEY)") + ": "));
+  if (!dashboardKey) {
+    console.error(
+      chalk.red("✖ No dashboard key provided.") +
+        `\n  Pass ${chalk.yellow("--dashboard-key <key>")} or set ${chalk.yellow("SPROUT_DASHBOARD_KEY")}.`,
+    );
+    process.exitCode = 1;
+    return;
+  }
 
   const isLocalHost = args.host === "127.0.0.1" || args.host === "localhost";
   if (!isLocalHost) {

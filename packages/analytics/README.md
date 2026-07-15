@@ -108,10 +108,94 @@ export default function RootLayout() {
 }
 ```
 
-```ts
+## Usage
+
+All four calls below are fire-and-forget -- no `await` -- and queue onto the
+same offline-durable buffer `initSprout` sets up: batched, retried with
+exactly-once ingest, nothing lost across app kills or dropped connectivity.
+Property values are restricted to `string | number | boolean | null` (no
+nested objects/arrays -- keep them flat).
+
+### `track` -- custom events
+
+```tsx
 import { track } from "@sprout-convex/analytics";
 
-track("game_started", { level: 3 });
+const UpgradeButton = ({ planId }: { planId: string }) => (
+  <Pressable
+    onPress={() => {
+      track("upgrade_tapped", { planId, source: "settings" });
+      router.push("/upgrade");
+    }}
+  >
+    <Text>Upgrade</Text>
+  </Pressable>
+);
+```
+
+### `screen` -- manual screen views
+
+`useSproutScreenTracking()` in your root layout already autocaptures
+expo-router navigation, so most apps never call this directly. Reach for it
+when a "view" doesn't correspond to a route change -- a modal, a step in a
+wizard, a tab inside a single screen:
+
+```tsx
+function OnboardingWizard() {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    screen(`onboarding/step-${step}`, { totalSteps: 4 });
+  }, [step]);
+
+  // ...
+}
+```
+
+### `identify` -- associate events with a user
+
+Call this once you know who the user is (after login, or on app start if
+they're already signed in) so their events and issues are attributable
+across sessions and devices:
+
+```tsx
+import { identify } from "@sprout-convex/analytics";
+
+async function handleLogin(email: string, password: string) {
+  const user = await signIn(email, password);
+  identify(user.id, { plan: user.plan, email: user.email });
+  router.replace("/");
+}
+```
+
+### `captureException` -- report a caught error
+
+Uncaught JS errors and fatal exceptions are captured automatically once
+`initSprout()` has run. Use `captureException` for errors your own code
+already catches and swallows, so they still show up as an issue:
+
+```tsx
+async function loadProfile(userId: string) {
+  try {
+    return await api.getProfile(userId);
+  } catch (error) {
+    captureException(error, { properties: { userId, screen: "profile" } });
+    return null; // fall back gracefully, but don't lose visibility into why
+  }
+}
+```
+
+It also composes with a React error boundary:
+
+```tsx
+import { captureException } from "@sprout-convex/analytics";
+
+class ScreenErrorBoundary extends React.Component<Props, State> {
+  componentDidCatch(error: unknown, info: React.ErrorInfo) {
+    captureException(error, { properties: { componentStack: info.componentStack } });
+  }
+  // ...
+}
 ```
 
 Once events are flowing, launch the dashboard from your app's root directory:
